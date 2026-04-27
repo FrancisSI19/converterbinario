@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Conversor Decimal ↔ Binário</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px 0;
+      font-size: 16px;
+    }
+    h2 { margin-top: 50px; }
+    h3 { margin-top: 20px; }
+    h4 { margin-top: 100px; }
+
+    .passo { margin-top: 10px; }
+
+    .binario {
+      font-family: monospace;
+      font-size: 18px;
+    }
+
+    .sinal {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<h3>Mestrado Profissional em Ensino da Computação - PROFCOMP (UFBA)</h3>
+<h3>Disciplina: Introdução ao Computador</h3>
+<h3>Docente: Profa. Dra. Vania Cordeiro da Silva</h3>
+<h3>Discente: Mestranda Francislene C. Ferreira</h3>
+
+<!-- ================= DECIMAL → BINÁRIO ================= -->
+
+<h2>Decimal → Binário</h2>
+
+<label>Número decimal:</label><br>
+<input type="number" id="decimal" min="-15" max="15"><br>
+
+<button onclick="converter()">Converter</button>
+
+<div id="resultado"></div>
+
+<!-- ================= BINÁRIO → DECIMAL ================= -->
+
+<h2>Binário → Decimal (Complemento de Dois)</h2>
+
+<label>Número binário (8 bits):</label><br>
+<input type="text" id="binario" placeholder="Ex: 11111101"><br>
+
+<button onclick="converterBinario()">Converter</button>
+
+<div id="resultadoBinario"></div>
+
+<h4>Criado em 26 de Abril de 2026</h4>
+
+<script>
+
+// ===== FUNÇÕES AUXILIARES =====
+
+function destacarSinal(bin) {
+  return `<span class="sinal">${bin[0]}</span>${bin.slice(1)}`;
+}
+
+function inverterBits(bin) {
+  return bin.split('').map(b => b === '0' ? '1' : '0').join('');
+}
+
+// TFN (Transformação de Base)
+function calcularTFN(bin) {
+  let resultado = 0;
+  let passos = [];
+  let tamanho = bin.length;
+
+  for (let i = 0; i < tamanho; i++) {
+    let bit = parseInt(bin[tamanho - 1 - i]);
+
+    if (bit === 1) {
+      passos.push(`1×2^${i}`);
+      resultado += Math.pow(2, i);
+    }
+  }
+
+  return {
+    expressao: passos.join(' + ') || '0',
+    valor: resultado
+  };
+}
+
+// ===== DECIMAL → BINÁRIO =====
+
+function converter() {
+  var num = parseInt(document.getElementById("decimal").value);
+  var bits = 8;
+  var saida = document.getElementById("resultado");
+
+  if (num < -15 || num > 15) {
+    saida.innerHTML = "Digite um número entre -15 e 15.";
+    return;
+  }
+
+  var html = "";
+
+  if (num >= 0) {
+    var bin = num.toString(2).padStart(bits, '0');
+
+    html += `<div class="passo">Número positivo → conversão direta</div>`;
+    html += `<div class="binario">${destacarSinal(bin)}</div>`;
+  } else {
+    var abs = Math.abs(num);
+
+    var positivo = abs.toString(2).padStart(bits, '0');
+    html += `<div class="passo">1) Valor Positivo (absoluto):</div>`;
+    html += `<div class="binario">${positivo}</div>`;
+
+    var invertido = inverterBits(positivo);
+    html += `<div class="passo">2) Inverter os bits (Inverte os bits 0 em 1 e vice-versa):</div>`;
+    html += `<div class="binario">${invertido}</div>`;
+
+    var soma = (parseInt(invertido, 2) + 1)
+      .toString(2)
+      .padStart(bits, '0');
+
+    html += `<div class="passo">3) Somar 1:</div>`;
+    html += `<div class="binario">${invertido} + 1 = ${soma}</div>`;
+
+    html += `<div class="passo"><strong>Resultado final:</strong></div>`;
+    html += `<div class="binario">${destacarSinal(soma)}</div>`;
+  }
+
+  saida.innerHTML = html;
+}
+
+// ===== BINÁRIO → DECIMAL =====
+
+function converterBinario() {
+  var bin = document.getElementById("binario").value;
+  var saida = document.getElementById("resultadoBinario");
+
+  if (!/^[01]{8}$/.test(bin)) {
+    saida.innerHTML = "Digite um número binário com 8 bits.";
+    return;
+  }
+
+  var html = "";
+
+  // CASO POSITIVO
+  if (bin[0] === '0') {
+    var tfn = calcularTFN(bin);
+
+    html += `<div class="passo">1) Bit de sinal = 0 → número positivo</div>`;
+    html += `<div class="passo">2) TFN (Transformação de Base):</div>`;
+    html += `<div class="binario">${bin} = ${tfn.expressao} = ${tfn.valor}</div>`;
+
+    saida.innerHTML = html;
+    return;
+  }
+
+  // CASO NEGATIVO
+
+  html += `<div class="passo">1) Bit de sinal = 1 → número negativo</div>`;
+
+  var invertido = inverterBits(bin);
+  html += `<div class="passo">2) Inverter os bits (Inverte os bits 0 em 1 e vice-versa):</div>`;
+  html += `<div class="binario">${invertido}</div>`;
+
+  var somaBin = (parseInt(invertido, 2) + 1)
+    .toString(2)
+    .padStart(8, '0');
+
+  html += `<div class="passo">3) Somar 1:</div>`;
+  html += `<div class="binario">${invertido} + 1 = ${somaBin}</div>`;
+
+  // TFN
+  var tfn = calcularTFN(somaBin);
+
+  html += `<div class="passo">4) TFN (Transformação de Base):</div>`;
+  html += `<div class="binario">${somaBin} = ${tfn.expressao} = ${tfn.valor}</div>`;
+
+  // Sinal
+  var decimal = -tfn.valor;
+
+  html += `<div class="passo">5) Aplicar sinal negativo:</div>`;
+  html += `<div class="binario">Resultado = ${decimal}</div>`;
+
+  saida.innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>
