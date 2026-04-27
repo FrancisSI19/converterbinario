@@ -44,7 +44,10 @@
 <h2>Decimal → Binário</h2>
 
 <label>Número decimal:</label><br>
-<input type="number" id="decimal" min="-15" max="15"><br>
+<input type="number" id="decimal"><br>
+
+<label>Número de bits:</label><br>
+<input type="number" id="bits" value="8"><br>
 
 <button onclick="converter()">Converter</button>
 
@@ -100,11 +103,11 @@ function calcularTFN(bin) {
 
 function converter() {
   var num = parseInt(document.getElementById("decimal").value);
-  var bits = 8;
+  var bits = parseInt(document.getElementById("bits").value);;
   var saida = document.getElementById("resultado");
 
-  if (num < -15 || num > 15) {
-    saida.innerHTML = "Digite um número entre -15 e 15.";
+   if (isNaN(num) || isNaN(bits)) {
+    saida.innerHTML = "Entrada inválida.";
     return;
   }
 
